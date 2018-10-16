@@ -1,0 +1,115 @@
+import matplotlib.pyplot as ppt
+import matplotlib.image as img
+import numpy as np 
+import PIL
+
+imagen = img.imread("D:\Maestria\Programacion cientifica\lp3.jpg")
+ppt.imshow(imagen)
+ppt.figure()
+imagen2D = np.array((imagen[:,:,0]))
+ppt.imshow(imagen2D, cmap = ppt.cm.gray)
+ppt.figure()
+print (np.shape(imagen2D))
+
+Largo = np.full((15,3),0)
+Alto = np.full((3,15),0)
+pequenha = np.full((3,3),0)
+
+
+m,n = np.shape(imagen2D)
+
+horizontal = np.full((m,n),0)
+vertical = np.full((m,n),0)
+
+offset_largo = 7
+offset_alto = 1
+bigmean = 0
+smallmean = 0
+
+
+for i in range (offset_alto,m):
+    for j  in range(offset_largo, n-offset_largo+1):
+        Largo =  imagen2D[i-offset_alto:i+offset_alto,j-offset_largo:j-offset_largo+1]
+        pequeninha = imagen2D[i-offset_alto:i+offset_alto,j-offset_alto:j+offset_alto]
+        bigmean = np.mean(Largo)
+        smallmean = np.mean(pequeninha)
+        result = bigmean/smallmean
+        if result > 1.5:
+            horizontal[i,j] = 1
+        else:
+            horizontal[i,j] = 0
+
+ppt.imshow(horizontal, cmap = ppt.cm.gray)
+ppt.title('Vertical')
+ppt.figure()
+
+for i in range (offset_largo,m-offset_largo):
+    for j  in range(offset_alto, n-offset_alto+1):
+        Alto =  imagen2D[i-offset_largo:i+offset_largo,j-offset_largo:j-offset_largo+1]
+        pequeninha = imagen2D[i-offset_alto:i+offset_alto,j-offset_alto:j+offset_alto]
+        bigmean = np.mean(Alto)
+        smallmean = np.mean(pequeninha)
+        result = bigmean/smallmean
+        if result > 1.5:
+            vertical[i,j] = 1
+        else:
+            vertical[i,j] = 0
+
+ppt.imshow(vertical, cmap = ppt.cm.gray)
+ppt.title('Horizontal')
+ppt.figure()
+
+suma = np.logical_not(np.logical_or(horizontal,vertical))
+ppt.imshow(suma, cmap = ppt.cm.gray)
+ppt.title('Suma')
+ppt.figure()
+
+counterfilas = 0
+countercols = 0
+segm = np.full((m,n),0)
+for i in range(m):
+    for j in range(n):
+        if suma[i,j] == False:
+            counterfilas += 1
+        
+        if counterfilas > 250:
+            segm[i,:] = 1
+            counterfilas = 0
+            break
+            
+
+for i in range(n):
+    for j in range(m):
+        if suma[j,i] == False:
+            counterfilas += 1
+        
+        if counterfilas > 100:
+            segm[:,i] = 1
+            counterfilas = 0
+            break
+            
+
+
+
+ppt.imshow(segm, cmap = ppt.cm.gray)
+ppt.title('Filas')
+ppt.figure()
+
+#mascara para aplicar
+mascara = np.full((m,n),0)
+
+
+
+for i in range (m):
+    for j in range (n):
+        if (i>=450 and i<=560 and j>= 400 and j<= 650):
+            mascara[i,j] = 1
+    
+
+resultado = imagen2D*mascara
+ppt.imshow(resultado, cmap = ppt.cm.gray)
+ppt.title('Segmentacion')
+ppt.figure()
+
+
+ppt.show()
